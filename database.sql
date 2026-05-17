@@ -1,16 +1,8 @@
--- ════════════════════════════════════════════════════════════
---  SouqTN — Schéma de base de données
---  Base : souqtn   (port 3306, voir config.php / core/Database.php)
---  Importez ce fichier dans phpMyAdmin ou via la ligne de commande :
---    mysql -u root -P 3306 < database.sql
--- ════════════════════════════════════════════════════════════
-
 CREATE DATABASE IF NOT EXISTS souqtn
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE souqtn;
 
--- ── Utilisateurs ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   username   VARCHAR(100)  NOT NULL,
@@ -20,13 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
--- ── Catégories ──────────────────────────────────────────────
+
 CREATE TABLE IF NOT EXISTS categories (
   id  INT AUTO_INCREMENT PRIMARY KEY,
   nom VARCHAR(120) NOT NULL
 );
 
--- ── Produits (équivalent SouqTN de la table "evenements") ───
+
 CREATE TABLE IF NOT EXISTS produits (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(200)   NOT NULL,
@@ -45,7 +37,7 @@ CREATE TABLE IF NOT EXISTS produits (
   created_at  TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
 );
 
--- ── Panier / commandes (équivalent de "participations") ─────
+
 CREATE TABLE IF NOT EXISTS cart (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   user_id      INT NOT NULL,
@@ -57,7 +49,7 @@ CREATE TABLE IF NOT EXISTS cart (
   FOREIGN KEY (product_id) REFERENCES produits(id) ON DELETE CASCADE
 );
 
--- ── Favoris (wishlist : liaison user ↔ produit) ─────────────
+
 CREATE TABLE IF NOT EXISTS favoris (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   user_id      INT NOT NULL,
@@ -87,7 +79,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   FOREIGN KEY (product_id) REFERENCES produits(id) ON DELETE CASCADE
 );
 
--- ── Données de démonstration (issues du catalogue SouqTN) ───
+
 INSERT INTO categories (nom) VALUES
   ('Artisanat'), ('Gastronomie'), ('Bijoux'),
   ('Textile'), ('Beauté'), ('Maison');
@@ -107,12 +99,4 @@ INSERT INTO produits
   ('Tableau Calligraphie Arabe','Calligraphie arabe à l''encre de chine sur papier Canson.','artisanat',180.000,220.000,9,4.85,74,'new','Tunis','Noureddine Kaabi'),
   ('Eau de Rose Damas Biologique','Eau de rose pure distillée à la vapeur, roses de Damas biologiques.','beaute',22.000,NULL,85,4.90,298,'bio','Djerba','Sonia Baccar');
 
--- ── Compte administrateur ──────────────────────────────────
--- ⚠️  NE PAS insérer le hash ici : un mot de passe bcrypt doit
---     être généré par PHP. Après avoir importé ce fichier,
---     ouvrez UNE FOIS dans le navigateur :
---
---        http://localhost/SouqTN/public/setup_admin.php
---
---     Cela crée le compte admin (admin@souqtn.tn / admin123)
---     avec un hash valide, puis supprimez ce fichier.
+
