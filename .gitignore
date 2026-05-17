@@ -1,0 +1,21 @@
+# Uploads (garder seulement le .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Logs
+*.log
+
+# Système
+.DS_Store
+Thumbs.db
+
+# Dépendances éventuelles
+/vendor/
+/node_modules/
+
+# Fichiers d'environnement sensibles
+.env
+
+# IDE
+/.vscode/
+/.idea/
