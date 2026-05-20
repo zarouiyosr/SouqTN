@@ -1,4 +1,3 @@
-<?php
 <style>
 .page {
   width: 100%;

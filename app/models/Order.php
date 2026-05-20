@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Modèle de commande SouqTN.
+ * Une commande est créée à partir du panier de l'utilisateur,
+ * avec un statut de livraison ('en_cours' ou 'livree').
+ */
 class Order {
     private PDO $db;
 
@@ -7,7 +11,10 @@ class Order {
         $this->db = Database::getConnection();
     }
 
-    
+    /**
+     * Transforme le panier de l'utilisateur en commande.
+     * Vide le panier ensuite. Retourne l'ID de la commande, ou 0 si panier vide.
+     */
     public function createFromCart(int $userId): int {
         // Récupère les lignes du panier avec le prix actuel des produits
         $stmt = $this->db->prepare("
@@ -84,4 +91,58 @@ class Order {
     /** Statistiques rapides pour le tableau de bord client. */
     public function getStats(int $userId): array {
         $stmt = $this->db->prepare("
+            SELECT
+              COUNT(*)                                          AS total_cmd,
+              SUM(statut = 'en_cours')                          AS en_cours,
+              SUM(statut = 'livree')                            AS livrees,
+              COALESCE(SUM(total), 0)                            AS montant_total
+            FROM orders WHERE user_id = ?
+        ");
+        $stmt->execute([$userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [
+            'total_cmd' => 0, 'en_cours' => 0, 'livrees' => 0, 'montant_total' => 0
+        ];
+    }
 
+    // ════════════════════ CÔTÉ ADMIN ════════════════════
+
+    /** Toutes les commandes de tous les clients (gestion admin). */
+    public function getAllOrders(): array {
+        return $this->db->query("
+            SELECT o.id, o.total, o.statut, o.created_at,
+                   u.username, u.email,
+                   COUNT(oi.id)                AS nb_articles,
+                   COALESCE(SUM(oi.qty), 0)    AS nb_unites
+            FROM orders o
+            JOIN users u        ON u.id = o.user_id
+            LEFT JOIN order_items oi ON oi.order_id = o.id
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /** Change le statut d'une commande (admin). */
+    public function setStatut(int $orderId, string $statut): bool {
+        if (!in_array($statut, ['en_cours', 'livree'], true)) {
+            return false;
+        }
+        $stmt = $this->db->prepare(
+            "UPDATE orders SET statut = ? WHERE id = ?"
+        );
+        return $stmt->execute([$statut, $orderId]);
+    }
+
+    /** Statistiques globales de toutes les commandes (admin). */
+    public function getGlobalStats(): array {
+        return $this->db->query("
+            SELECT
+              COUNT(*)                                AS total_cmd,
+              SUM(statut = 'en_cours')                AS en_cours,
+              SUM(statut = 'livree')                  AS livrees,
+              COALESCE(SUM(total), 0)                 AS chiffre_affaires
+            FROM orders
+        ")->fetch(PDO::FETCH_ASSOC) ?: [
+            'total_cmd' => 0, 'en_cours' => 0, 'livrees' => 0, 'chiffre_affaires' => 0
+        ];
+    }
+}
