@@ -13,8 +13,12 @@ class Database {
             self::$instance = new PDO(
                 "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4",
                 $user, $pass,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_SSL_CA => '/var/www/html/ca.pem',
+                    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
+                ]
             );
         }
         return self::$instance;
